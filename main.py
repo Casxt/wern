@@ -31,7 +31,7 @@ parser.add_argument('--epsilon', type=float, default=1e-8)
 parser.add_argument('--meta_beta', type=float, default=10.0)
 parser.add_argument('--tag', type=int, default=1)
 
-
+# python main.py --model WReN --device 1 --path /root/abstract-reasoning/dataset --save ./results/checkpoint-wren/ --log ./results/log-wren/ --img_size 80
 args = parser.parse_args()
 args.cuda = torch.cuda.is_available()
 torch.cuda.set_device(args.device)
@@ -47,9 +47,9 @@ train = dataset(args.path, "train", args.img_size, transform=transforms.Compose(
 valid = dataset(args.path, "val", args.img_size, transform=transforms.Compose([ToTensor()]))
 test = dataset(args.path, "test", args.img_size, transform=transforms.Compose([ToTensor()]))
 
-trainloader = DataLoader(train, batch_size=args.batch_size, shuffle=True, num_workers=16)
-validloader = DataLoader(valid, batch_size=args.batch_size, shuffle=False, num_workers=16)
-testloader = DataLoader(test, batch_size=args.batch_size, shuffle=False, num_workers=16)
+trainloader = DataLoader(train, batch_size=args.batch_size, shuffle=True, num_workers=16, drop_last=True)
+validloader = DataLoader(valid, batch_size=args.batch_size, shuffle=False, num_workers=16, drop_last=True)
+testloader = DataLoader(test, batch_size=args.batch_size, shuffle=False, num_workers=16, drop_last=True)
 
 model = None
 if args.model == 'WReN':
@@ -58,6 +58,8 @@ elif args.model == 'CNN_MLP':
     model = models.CNN_MLP(args)
 elif args.model == 'Resnet50_MLP':
     model = models.Resnet50_MLP(args)
+elif args.model == 'Resnet34_MLP':
+    model = models.Resnet34_MLP(args)
 elif args.model == 'LSTM':
     model = models.CNN_LSTM(args)
 

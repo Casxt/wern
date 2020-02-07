@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from basic_model import BasicModel
+from .basic_model import BasicModel
 
 class conv_module(nn.Module):
     def __init__(self):
@@ -62,7 +62,7 @@ class mlp_module(nn.Module):
         self.dropout = nn.Dropout(0.5)
         self.fc2 = nn.Linear(256, 256)
         self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(256, 13)
+        self.fc3 = nn.Linear(256, 12)
 
 
     def forward(self, x):
@@ -70,7 +70,7 @@ class mlp_module(nn.Module):
         x = self.relu2(self.fc2(x))
         x = self.dropout(x)
         x = self.fc3(x)
-        return x.view(-1, 8, 13)
+        return x.view(-1, 8, 12)
 
 class panels_to_embeddings(nn.Module):
     def __init__(self, tag):
@@ -155,12 +155,12 @@ class WReN(BasicModel):
     def compute_loss(self, output, target, meta_target):
         pred, meta_pred = output[0], output[1]
         target_loss = F.cross_entropy(pred, target)
-        meta_pred = torch.chunk(meta_pred, chunks=12, dim=1)
-        meta_target = torch.chunk(meta_target, chunks=12, dim=1)
+        meta_pred = torch.chunk(meta_pred, chunks=11, dim=1)
+        meta_target = torch.chunk(meta_target, chunks=11, dim=1)
         meta_target_loss = 0.
-        for idx in range(0, 12):
+        for idx in range(0, 11):
             meta_target_loss += F.binary_cross_entropy(F.sigmoid(meta_pred[idx]), meta_target[idx])
-        loss = target_loss + self.meta_beta*meta_target_loss / 12.
+        loss = target_loss + self.meta_beta*meta_target_loss / 11.
         return loss
 
     def forward(self, x):
@@ -177,6 +177,6 @@ class WReN(BasicModel):
         # print(panel_embedding_features.size())
         sum_features = self.rn_sum_features(panel_embedding_features)
         output = self.mlp(sum_features.view(-1, 256))
-        pred = output[:,:,12]
-        meta_pred = torch.sum(output[:,:,0:12], dim=1)
+        pred = output[:,:,11]
+        meta_pred = torch.sum(output[:,:,0:11], dim=1)
         return pred, meta_pred

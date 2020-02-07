@@ -1,8 +1,8 @@
 import os
 import glob
 import numpy as np
-from scipy import misc
-
+# from scipy import misc
+from skimage.transform import resize
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
@@ -28,17 +28,21 @@ class dataset(Dataset):
         # data_path = os.path.join(self.root_dir, self.file_names[idx])
         data_path = self.file_names[idx]
         data = np.load(data_path)
-        image = data["image"].reshape(16, 160, 160)
+        image = data["image"].reshape(16, 500, 500)
+        # image = data["arr_1"].reshape(16, 500, 500)
         resize_image = []
         for idx in range(0, 16):
-            resize_image.append(misc.imresize(image[idx,:,:], (self.img_size, self.img_size)))
+            # resize_image.append(misc.imresize(image[idx,:,:], (self.img_size, self.img_size)))
+            resize_image.append(resize(image[idx,:,:], (self.img_size, self.img_size)))
         resize_image = np.stack(resize_image)
         # image = resize(image, (16, 128, 128))
         # meta_matrix = data["mata_matrix"]
         target = data["target"]
+        # target = data["arr_0"]
         # structure = data["structure"]
+        # meta_target = data["meta_target"]
         meta_target = data["meta_target"]
-
+        # meta_target = data["arr_4"]
         if meta_target.dtype == np.int8:
             meta_target = meta_target.astype(np.uint8)
         # if meta_structure.dtype == np.int8:

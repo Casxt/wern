@@ -18,7 +18,7 @@ class identity(nn.Module):
 class mlp_module(nn.Module):
     def __init__(self):
         super(mlp_module, self).__init__()
-        self.fc1 = nn.Linear(2048, 512)
+        self.fc1 = nn.Linear(512, 512)
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(512, 8)
         self.dropout = nn.Dropout(0.5)
@@ -29,12 +29,12 @@ class mlp_module(nn.Module):
         x = self.fc2(x)
         return x
 
-class Resnet50_MLP(BasicModel):
+class Resnet34_MLP(BasicModel):
     def __init__(self, args):
-        super(Resnet50_MLP, self).__init__(args)
-        self.resnet50 = models.resnet50(pretrained=False)
-        self.resnet50.conv1 = nn.Conv2d(16, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.resnet50.fc = identity()
+        super(Resnet34_MLP, self).__init__(args)
+        self.resnet34 = models.resnet34(pretrained=False)
+        self.resnet34.conv1 = nn.Conv2d(16, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.resnet34.fc = identity()
         self.mlp = mlp_module()
         self.optimizer = optim.Adam(self.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.epsilon)
 
@@ -44,7 +44,7 @@ class Resnet50_MLP(BasicModel):
         return loss
 
     def forward(self, x):
-        features = self.resnet50(x.view(-1, 16, 224, 224))
+        features = self.resnet34(x.view(-1, 16, 224, 224))
         score = self.mlp(features)
         return score, None
 
